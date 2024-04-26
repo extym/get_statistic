@@ -10,7 +10,13 @@ import datetime
 import logging
 import os
 
-from cred import OZON_HEADERS, ANY_OZON_HEADERS
+from cred import *
+
+OZON_HEADERS = {
+    "Client-Id": art_client_id,
+    "Api-Key": art_token,
+    "Content-Type": "application/json",
+    "Accept": "application/json"}
 
 DATE_FORMAT = "%Y-%m-%dT%H:00:00.000Z"
 host = 'https://api-seller.ozon.ru'
@@ -78,7 +84,7 @@ def get_stocks():
     return res
 
 
-def get_reports_list(delta_days=7, headers=ANY_OZON_HEADERS):
+def get_reports_list(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/report/list'
     data = {
         "page": 1,
@@ -87,13 +93,13 @@ def get_reports_list(delta_days=7, headers=ANY_OZON_HEADERS):
     }
     answer = requests.post(url=url, headers=headers, json=data)
 
-    print(answer.json())
+    print(222222, answer.json())
 
 
-get_reports_list()
+# get_reports_list()
 
 
-def report_product_create(delta_days=7, headers=ANY_OZON_HEADERS):
+def report_product_create(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/report/products/create'
     data = {
         "language": "DEFAULT",
@@ -108,7 +114,7 @@ def report_product_create(delta_days=7, headers=ANY_OZON_HEADERS):
     # {'code': 'REPORT_seller_products_any_1709521529_fdfb12e1-5d87-42a0-9b4f-0f432095df86'}}
 
 
-def report_returns_create(delta_days=7, headers=ANY_OZON_HEADERS):
+def report_returns_create(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/report/returns/create'
     data = {
         "filter": {
@@ -123,7 +129,7 @@ def report_returns_create(delta_days=7, headers=ANY_OZON_HEADERS):
     print(answer.json())
 
 
-def report_postings_create(delta_days=7, headers=ANY_OZON_HEADERS):
+def report_postings_create(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/report/postings/create'
     dt = datetime.datetime.now() - datetime.timedelta(days=delta_days)
     date = dt.strftime("%Y-%m-%dT%H:00:00.000Z")
@@ -151,7 +157,7 @@ def report_postings_create(delta_days=7, headers=ANY_OZON_HEADERS):
     # {'code': 'REPORT_seller_postings_any_1709522189_cfa094ee-d7b5-4076-b4a2-4db2f771eed2'}}
 
 
-def report_finance_get(delta_days=7, headers=ANY_OZON_HEADERS):
+def report_finance_get(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/finance/cash-flow-statement/list'
     dt = datetime.datetime.now() - datetime.timedelta(days=delta_days)
     date = dt.strftime("%Y-%m-%dT%H:00:00.000Z")
@@ -188,14 +194,14 @@ def report_finance_get(delta_days=7, headers=ANY_OZON_HEADERS):
     print(answer.json())
 
 
-def report_finance_realisation(delta_days=7, headers=ANY_OZON_HEADERS):
+def report_finance_realisation(delta_days=7, headers=OZON_HEADERS):
     url = 'https://api-seller.ozon.ru/v1/finance/realization'
     data = {
-        "date": "2024-01"
+        "date": "2024-03"
     }
     answer = requests.post(url=url, headers=headers, json=data)
     data = answer.json()
-    print(data)
+    print(1111, data)
     return data
 
 

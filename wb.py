@@ -1,8 +1,20 @@
+import pytz
 import requests
-from cred import wb_adv_token
+from cred import *
 import datetime
 
 print(datetime.date.today() - datetime.timedelta(days=7))
+
+def write_smth(smth):
+    time = datetime.now(pytz.timezone("Africa/Nairobi")).isoformat()
+    try:
+        f = open(DIR_EXCEL + '/no_test.txt', 'a')
+        f.write(str(time) + str(smth) + '\n')
+        f.close()
+    except:
+        f = open('no_test.txt', 'a')
+        f.write(str(time) + str(smth) + '\n')
+        f.close()
 
 
 def get_advertising_report(time_delta=7):
