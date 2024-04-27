@@ -7,7 +7,7 @@ import random
 import string
 
 import requests
-from flask import Flask, request
+from flask import Flask, request, flash, redirect, url_for, render_template, send_from_directory
 from gevent.pywsgi import WSGIServer
 import pytz
 from datetime import datetime, timedelta
@@ -18,14 +18,14 @@ import urllib3
 
 urllib3.disable_warnings()
 
+now = datetime.strftime(datetime.now(), "%d-%h-%Y_%H:%M:%S")
+print(now)
 
-def write_json(smth_json):
-    try:
-        with open(DIR_EXCEL + '/test_json.json', 'w') as file:
-            json.dump(smth_json, file)
-    except:
-        with open('test_json.json', 'w') as file:
-            json.dump(smth_json, file)
+
+def write_keys(smth_json, market):
+    now = datetime.strftime(datetime.now(), "%d-%h-%Y_%H:%M:%S")
+    with open(DIR_CRED + f'/{market}_{now}.json', 'w') as file:
+        json.dump(smth_json, file)
 
 
 def write_smth_date():
@@ -39,6 +39,12 @@ def write_smth_date():
         f.write(str(time) + '\n')
         f.close()
 
+
+def write_smth_data(smth):
+    time = datetime.now(pytz.timezone("Africa/Nairobi")).isoformat()
+    f = open(DIR_CRED + '/no_test.txt', 'a')
+    f.write(str(time) + str(smth) + '\n')
+    f.close()
 
 def write_smth(smth):
     time = datetime.now(pytz.timezone("Africa/Nairobi")).isoformat()
@@ -110,7 +116,9 @@ async def send_post(data):
     # return result
 
 
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder='templates/')
+app.secret_key = import_key
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -131,6 +139,55 @@ common_product_error = {'error': {
     "message": "Product not found",
     "details": None}}
 
+@app.route('/index', methods=['get', 'post'])
+def index():
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        id  = data.get('id')
+        key = data.get('key')
+        market = data.get('market')
+        ip = request.headers.get('X-Forwarded-For')
+        data['ip'] = ip
+        time = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        if market == 'wb' and key:
+            url = ''
+            headers = {
+                "Authorization": key
+            }
+
+            date_from = {
+                "dateFrom":time
+            }
+            answer = requests.get(url=url, headers=headers, params=date_from)
+            if answer.ok:
+                name = f'super-file_{time}.xlsx'
+                write_keys(data, market)
+                flash(f'Данные удачно сохранены. Запущено формирование отчетов. '
+                      f'\n Файл будет доступен по адресу {request.url}{name}', 'success')
+            else:
+                write_smth_data(data)
+                flash('Данные некорректны. Проверьте правильность введенных данных', 'error')
+
+        if market == "oson" and id and key:
+                headers = {
+                    "Client-Id": id,
+                    "Api-Key": key
+                }
+
+                url = 'https://api-seller.ozon.ru/v1/warehouse/list'
+                answer = requests.post(url=url, headers=headers)
+                if answer.ok:
+                    write_keys(data, market)
+                    name = f'super-file_{time}.xlsx'
+                    flash(f'Данные удачно сохранены. Запущено формирование отчетов. '
+                          f'\n Файл будет доступен по адресу {request.url}{name}', 'success')
+                else:
+                    write_smth_data(data)
+                    flash('Данные некорректны. Проверьте правильность введенных данных', 'error')
+        # print(222222, data, request.url)
+        return redirect(request.url)
+
+    return render_template('index.html')
 
 @app.route('/test', methods=['GET'])
 def test():
@@ -143,5 +200,5 @@ if __name__ == '__main__':
     ##run app in debug mode on port 5000
     # app.run(debug=True, host='0.0.0.0', port=5000)
     # Production
-    http_server = WSGIServer(('', 7000), app)
+    http_server = WSGIServer(('', 7700), app)
     http_server.serve_forever()

@@ -72,7 +72,7 @@ def writer():
     print(*row.keys(), sep=",\n")
     print(3333, len(matrix))
 
-    path = DIR_EXCEL + '/super_file-1.xlsx'
+    path = DIR_EXCEL + '/super_file.xlsx'
     columns = ['No',
                'Артикул', 'Ozon SKU ID', 'Название', 'Цена до скидки, руб.',
                'цена для покупателя', 'Ваша цена', 'Скидка, %', 'Скидка, руб.',
